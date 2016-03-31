@@ -124,7 +124,7 @@
 
     fetch('.status.json')
       .then(res => res.status >= 400 ? Promise.reject(res) : res)
-      .catch(() => fetch('https://raw.githubusercontent.com/' + window.location.hash.slice(1) + '/master/.status.json'))
+      .catch(() => fetch('https://raw.githubusercontent.com/' + window.location.hash.replace('#/', '').replace('#', '') + '/master/.status.json'))
       .then(res => res.status >= 400 ? Promise.reject(res) : res)
       .then(res => res.json())
       .then(res => getStatuses(res.servers))
