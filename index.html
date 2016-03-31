@@ -46,7 +46,7 @@
     }
     
     function $render (q, c) {
-      return $(q).appendChild(c)
+      return $(q).appendChild(c.render ? c.render() : c)
     }
     
     function H (cons, meta, children) {
@@ -94,21 +94,43 @@
         }) 
       }
         
-      if (children) children.forEach(child => typeof child === 'string' ? node.innerHTML += child : node.appendChild(child))
+      if (children) children.forEach(child => typeof child === 'string' ? node.innerHTML += child : node.appendChild(child.render ? child.render() : child))
       if (componentHandler) componentHandler.upgradeElement(node)
 
       return node
     }
     
-    var StatusCard = props => H('.mdl-card.mdl-shadow--2dp', [
-      H('.mdl-card__title', [
-        H('h2', ['Welcome!'])
-      ]),
-      H('.mdl-card__supporting-text', [
-        'lorem ipsum................'
-      ])
-    ])
+    function Component (renderFunc) {
+      return function (state, children) {
+        return {
+          DOMNode: undefined,
+          state: Object.assign(state, children),
+          setState: function (newState) {
+            Object.assign(this.state, newState)
+            this.render()
+          },
+          render: function () {
+            var newNode = renderFunc(this.state)
+            if (this.DOMNode) this.DOMNode.parentNode.replaceChild(newNode, this.DOMNode)
+            return this.DOMNode = newNode
+          } 
+        }
+      }
+    }
     
-    $render('#root', StatusCard())
+    var StatusCard = Component(props => 
+      H('.mdl-card.mdl-shadow--2dp', [
+        H('.mdl-card__title', [
+          H('h2', [props.title])
+        ]),
+        H('.mdl-card__supporting-text', [
+          'lorem ipsum................'
+        ])
+      ])
+    )
+    
+    var S = StatusCard({ title: 'Welcome!' })
+    
+    $render('#root', S)
   </script>
 </html>
