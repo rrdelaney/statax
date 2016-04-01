@@ -54,7 +54,11 @@
 
     function getStatuses (servers) {
       return Promise.all(servers.map(getStatus))
-        .then(servers => Object.assign(servers, { tags: servers.map(s => s.tags).reduce((x, y) => x.concat(y || []), []) }))
+        .then(servers => Object.assign(servers, {
+          tags: servers.map(s => s.tags)
+            .reduce((x, y) => x.concat(y || []), [])
+            .reduce((x, y) => x.concat(x.includes(y) ? [] : y), [])
+        }))
     }
 
     var StatusCard = Component(props => {
